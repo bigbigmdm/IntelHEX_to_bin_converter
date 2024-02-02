@@ -178,7 +178,6 @@ void MainWindow::on_pushButton_open_hex_clicked()
  {
      currStr = file.readLine();
      counter = 0;
-     //qDebug() << currStr;
      //parsing string
      if (currStr[0] != ':')
      {
@@ -197,7 +196,6 @@ void MainWindow::on_pushButton_open_hex_clicked()
      if (hi_addr * 256 * 256 + lo_addr  > static_cast<unsigned long>(chipSize))
      {
          QMessageBox::about(this, tr("Error"), tr("The address is larger than the size of the chip!"));
-         qDebug() << "ChipSize=" << chipSize << " Address=" << hi_addr * 256 * 256 + lo_addr;
          return;
      }
 
@@ -205,8 +203,6 @@ void MainWindow::on_pushButton_open_hex_clicked()
      strVal = currStr.mid(7,2);
      command = hexToInt(strVal);
      counter = counter + static_cast<unsigned char>(command);
-
-     //qDebug() << "bytes=" << lineLen << "lo_addr=" << lo_addr << "command=" << command;
 
      if (command == 0) //reading bytes from current string
      {
@@ -216,14 +212,12 @@ void MainWindow::on_pushButton_open_hex_clicked()
              strVal.clear();            //get current byte of string
              strVal = currStr.mid(int(i) * 2 + 9, 2);
              currByte = static_cast<unsigned char>(hexToInt(strVal));
-             //qDebug() << currByte;
              buf.data()[hi_addr * 256 * 256 + lo_addr + i] = char(currByte);
              counter = counter + static_cast<unsigned char>(hexToInt(strVal));
 
          }
              counter = 255 - counter + 1;
              checkSUM = static_cast<unsigned char>(hexToInt( currStr.mid(int(i) * 2 + 9, 2)));
-             //qDebug() << "counter=" << counter << " checksum=" << checkSUM;
 
              if (counter != checkSUM)
              {
@@ -245,12 +239,10 @@ void MainWindow::on_pushButton_open_hex_clicked()
              QMessageBox::about(this, tr("Error"), tr("Checksum error!"));
              return;
          }
-         qDebug() << hi_addr;
      }
 
 
  }
- qDebug() << "ChipSize=" << chipSize << " Address=" << hi_addr * 256 * 256 + lo_addr;
  file.close();
  fileName.clear();
 }
@@ -275,4 +267,30 @@ void MainWindow::on_pushButton_save_bin_clicked()
     file.write(buf);
     file.close();
 
+}
+
+void MainWindow::on_pushButton_open_cap_clicked()
+{
+    ui->statusBar->showMessage(tr("Opening file"));
+    fileName = QFileDialog::getOpenFileName(this,
+                                QString(tr("Open file")),
+                                lastDirectory,
+                                "ASUS Data Images (*.cap *.CAP);;All files (*.*)");
+    QFileInfo info(fileName);
+    ui->statusBar->showMessage(tr("Current file: ") + info.fileName());
+    lastDirectory = info.filePath();
+    QFile file(fileName);
+
+    if (!file.open(QIODevice::ReadOnly))
+    {
+
+        return;
+    }
+    buf.resize(int(info.size()));
+    buf = file.readAll();
+    file.close();
+    fileName.clear();
+    buf.remove(0,0x800);
+    lastDirectory.replace(".cap", ".bin");
+    lastDirectory.replace(".CAP", ".bin");
 }

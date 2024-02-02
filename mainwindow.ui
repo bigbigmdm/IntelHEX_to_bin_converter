@@ -48,6 +48,13 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_open_cap">
+          <property name="text">
+           <string>Open .cap</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
       <item>
